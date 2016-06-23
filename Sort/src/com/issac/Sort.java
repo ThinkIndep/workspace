@@ -86,10 +86,34 @@ public class Sort {
 
 	}
 
+	public void InsertSort(int[] arr, boolean DESC) {// 插入排序
+
+		for (int i = 1; i < arr.length; i++) {
+
+			int tmp = arr[i];//取出要比较的数，
+
+			if (DESC) {
+
+				for (int j = i; j > 0 && arr[j - 1] < tmp; j--) {
+					
+					arr[j] = arr[j - 1];//移出空位
+					arr[j - 1] = tmp;//新取出数的位置
+				}
+			} else {
+
+				for (int j = i; j > 0 && arr[j - 1] > tmp; j--) {
+
+					arr[j] = arr[j - 1];
+					arr[j - 1] = tmp;
+				}
+			}
+		}
+	}
+
 	public static void main(String[] args) {
 		Sort sort = new Sort();
 		int RandomArr[] = sort.createRandomArr();
-		System.out.print("随机生成的数组:");
+		System.out.print("随机生成的待排序数组:");
 		sort.PrintArr(RandomArr);
 		System.out.println("快速排序");
 		sort.quickSort(RandomArr, 0, RandomArr.length - 1, false);
@@ -97,6 +121,13 @@ public class Sort {
 		sort.PrintArr(RandomArr);
 		sort.quickSort(RandomArr, 0, RandomArr.length - 1, true);
 		System.out.print("降序：");
+		sort.PrintArr(RandomArr);
+		System.out.println("插入排序");
+		System.out.println("升序：");
+		sort.InsertSort(RandomArr,false);
+		sort.PrintArr(RandomArr);
+		System.out.println("降序：");
+		sort.InsertSort(RandomArr,true);
 		sort.PrintArr(RandomArr);
 	}
 }
