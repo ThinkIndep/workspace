@@ -30,14 +30,6 @@ public class Sort {
 		System.out.println();
 	}
 
-	public int[] swap(int arr[], int a, int b) {// 交换两个变量的值
-		int tmp;
-		tmp = arr[b];
-		arr[b] = arr[a];
-		arr[a] = tmp;
-		return arr;
-	}
-
 	public void quickSort(int arr[], int start, int end, Boolean DESC) {// 快速排序
 		int i, j, pivot;
 		if (start > end) {
@@ -86,18 +78,43 @@ public class Sort {
 
 	}
 
+	public void SelectSort(int[] arr, boolean DESC) {// 选择排序
+		int index = 0, tmp;
+		for (int i = 0; i < arr.length - 1; i++) {
+			int data = arr[i];
+			index = i;
+			for (int j = i; j < arr.length - 1; j++) {// 寻找最小数
+				if (DESC) {// 如果按降序排序
+
+					if (data < arr[j + 1]) {
+						data = arr[j + 1];
+						index = j + 1;
+					}
+				} else {
+					if (data > arr[j + 1]) {
+						data = arr[j + 1];
+						index = j + 1;
+					}
+				}
+			}
+			tmp = arr[i];// 与最小数交换位置
+			arr[i] = arr[index];
+			arr[index] = tmp;
+		}
+	}
+
 	public void InsertSort(int[] arr, boolean DESC) {// 插入排序
 
 		for (int i = 1; i < arr.length; i++) {
 
-			int tmp = arr[i];//取出要比较的数，
+			int tmp = arr[i];// 取出要比较的数，
 
 			if (DESC) {
 
 				for (int j = i; j > 0 && arr[j - 1] < tmp; j--) {
-					
-					arr[j] = arr[j - 1];//移出空位
-					arr[j - 1] = tmp;//新取出数的位置
+
+					arr[j] = arr[j - 1];// 移出空位
+					arr[j - 1] = tmp;// 新取出数的位置
 				}
 			} else {
 
@@ -123,11 +140,18 @@ public class Sort {
 		System.out.print("降序：");
 		sort.PrintArr(RandomArr);
 		System.out.println("插入排序");
-		System.out.println("升序：");
-		sort.InsertSort(RandomArr,false);
+		System.out.print("升序：");
+		sort.InsertSort(RandomArr, false);
 		sort.PrintArr(RandomArr);
-		System.out.println("降序：");
-		sort.InsertSort(RandomArr,true);
+		System.out.print("降序：");
+		sort.InsertSort(RandomArr, true);
+		sort.PrintArr(RandomArr);
+		System.out.println("选择排序");
+		sort.SelectSort(RandomArr, false);
+		System.out.print("升序：");
+		sort.PrintArr(RandomArr);
+		sort.SelectSort(RandomArr, true);
+		System.out.print("降序：");
 		sort.PrintArr(RandomArr);
 	}
 }
