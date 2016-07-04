@@ -24,6 +24,7 @@ public class MyBookSysManager {
 	JLabel img_lable = new JLabel();
 	JMenuBar menuBar = new JMenuBar();
 	JMenu menu = new JMenu("菜单");
+	JMenu exit_menu = new JMenu("退出");
 	JMenuItem rederManager = new JMenuItem("读者管理系统");
 	JMenuItem borrowManager = new JMenuItem("借阅管理系统");
 	ImageIcon icon = new ImageIcon("book.jpg");
@@ -67,6 +68,7 @@ public class MyBookSysManager {
 		menu.add(rederManager);
 		menu.add(borrowManager);
 		menuBar.add(menu);
+		menuBar.add(exit_menu);
 
 		mainFrame.setJMenuBar(menuBar);
 		mainFrame.add(top_jp);
