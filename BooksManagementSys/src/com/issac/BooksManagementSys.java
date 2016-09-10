@@ -158,8 +158,66 @@ public class BooksManagementSys {
 		System.out.println("借/还图书");
 	}
 
+	/**
+	 * 修改图书信息
+	 */
 	public void modifyBookInfo() {
-		System.out.println("修改图书信息");
+		Scanner input = new Scanner(System.in);
+		System.out.print("请输入要修改图书的编号：");
+		String bookId = input.nextLine();
+		while (bookId.equals("")) {
+			System.out.print("输入不能为空!!!\n请重新输入图书编号：");
+			bookId = input.nextLine();
+		}
+		while (!isNumeric(bookId)) {
+			System.out.print("输入有误！！图书编号只能由数字组成！！\n请重新输入图书编号：");
+			bookId = input.nextLine();
+		}
+		if (library.get(bookId) == null) {
+			System.out.print("此图书不存在，请重新输入正确的图书编号：");
+			bookId = input.next();
+		}
+		book = library.get(bookId);
+		System.out.println("图书编号：" + book.getBookId() + "\n" + "图书名称：" + book.getBookName() + "\n" + "图书作者："
+				+ book.getBookAuthor() + "\n" + "出版社：" + book.getBookPress() + "\n" + "现存地址：" + book.getBookAddress()
+				+ "\n" + "图书总数：" + book.getBookSum() + "\n" + "在馆数：" + book.getInLibrarySum());
+		System.out.println("请输入修改后的信息，如不需要修改该项请直接按回车！");
+		System.out.print("图书名称：");
+		String bookName = input.nextLine();
+		if (!bookName.equals("")) {
+			book.setBookName(bookName);
+		}
+		System.out.print("图书作者：");
+		String bookAuthor = input.nextLine();
+		if (!bookAuthor.equals("")) {
+			book.setBookAuthor(bookAuthor);
+		}
+		System.out.print("出版社：");
+		String bookPress = input.nextLine();
+		if (!bookPress.equals("")) {
+			book.setBookPress(bookPress);
+		}
+		System.out.print("现存地址：");
+		String bookAddress = input.nextLine();
+		if (!bookAddress.equals("")) {
+			book.setBookAddress(bookAddress);
+		}
+		System.out.print("图书总数：");
+		String bookSum = input.nextLine();
+		if (!bookSum.equals("")) {
+			book.setBookSum(bookSum);
+		}
+		System.out.print("在馆数：");
+		String inLibrarySum = input.nextLine();
+		if (!inLibrarySum.equals("")) {
+			book.setInLibrarySum(inLibrarySum);
+		}
+		System.out.println("修改成功！！");
+		System.out.println("图书编号：" + book.getBookId() + "\n" + "图书名称：" + book.getBookName() + "\n" + "图书作者："
+				+ book.getBookAuthor() + "\n" + "出版社：" + book.getBookPress() + "\n" + "现存地址：" + book.getBookAddress()
+				+ "\n" + "图书总数：" + book.getBookSum() + "\n" + "在馆数：" + book.getInLibrarySum());
+		//library.put(book.getBookId(), book);
+		mainMenu();
 	}
 
 	public void deleteBook() {
