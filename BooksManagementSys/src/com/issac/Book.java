@@ -1,18 +1,16 @@
 package com.issac;
 
-import java.sql.Date;
-
 public class Book {
-	private String bookId;
-	private String bookAuthor;
-	private String bookName;
-	private String bookPress;
-	private String bookAddress;
-	private String bookSum;
-	private String inLibrarySum;
-	private String borrowSum;
-	private Date deleteDate;
-	private Date buyDate;
+	private String bookId;// 图书编号
+	private String bookAuthor;// 图书作者
+	private String bookName;// 图书名称
+	private String bookPress;// 出版社
+	private String bookAddress;// 现存地址
+	private String bookSum;// 总共册数
+	private String inLibrarySum;// 在馆数
+	private String borrowSum;// 借阅次数
+	private String deleteDate;// 删除时间
+	private String buyDate;// 录入时间
 
 	public String getBookId() {
 		return bookId;
@@ -78,19 +76,19 @@ public class Book {
 		this.borrowSum = borrowSum;
 	}
 
-	public Date getDeleteDate() {
+	public String getDeleteDate() {
 		return deleteDate;
 	}
 
-	public void setDeleteDate(Date deleteDate) {
+	public void setDeleteDate(String deleteDate) {
 		this.deleteDate = deleteDate;
 	}
 
-	public Date getBuyDate() {
+	public String getBuyDate() {
 		return buyDate;
 	}
 
-	public void setBuyDate(Date buyDate) {
+	public void setBuyDate(String buyDate) {
 		this.buyDate = buyDate;
 	}
 

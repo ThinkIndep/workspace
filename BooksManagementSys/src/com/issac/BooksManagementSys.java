@@ -1,11 +1,17 @@
 package com.issac;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class BooksManagementSys {
@@ -84,6 +90,8 @@ public class BooksManagementSys {
 	}
 
 	public void login() {
+		read();
+		mainMenu();
 	}
 
 	public void addBook() {
@@ -96,7 +104,7 @@ public class BooksManagementSys {
 			bookid = input.nextLine();
 		}
 		while (!isNumeric(bookid)) {
-			System.out.println("输入有误！！图书编号只能由数字组成！！\n请重新输入图书编号：");
+			System.out.print("输入有误！！图书编号只能由数字组成！！\n请重新输入图书编号：");
 			bookid = input.nextLine();
 		}
 		if (library.get(bookid) != null) {
@@ -130,12 +138,14 @@ public class BooksManagementSys {
 			System.out.print("请输入新进册数：");
 			String count = input.nextLine();
 			while (!isNumeric(count)) {
-				System.out.println("输入有误！！请不要输入数字以外的字符！！\n请重新输入新进册数：");
+				System.out.print("输入有误！！请不要输入数字以外的字符！！\n请重新输入新进册数：");
 				count = input.nextLine();
 			}
 			book.setBookSum(count);
 			book.setInLibrarySum(count);
-			library.put(book.getBookId(), book);
+			DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 录入时间系统自动生成
+			book.setBuyDate(df.format(new Date()));
+			library.put(book.getBookId(), book);// 将录入的新书暂存在TreeMap的实例library中
 		}
 		System.out.println("书籍添加成功！！");
 		display();
@@ -173,20 +183,39 @@ public class BooksManagementSys {
 	}
 
 	public void save() {
-		File bookInfo = new File("H://BookManagementSys//bookInfo.txt");
-		if (!bookInfo.exists()) {
+		Iterator<String> bookIds = library.keySet().iterator();
+		StringBuilder bookAttribute = new StringBuilder();
+		while (bookIds.hasNext()) {
+			book = library.get(bookIds.next());
+			bookAttribute.append(
+					book.getBookId() + "," + book.getBookName() + "," + book.getBookAuthor() + "," + book.getBookPress()
+							+ "," + book.getBookSum() + "," + book.getInLibrarySum() + "," + book.getBookAddress() + ","
+							+ book.getBorrowSum() + "," + book.getBuyDate() + "," + book.getDeleteDate() + "\r\n");
+		}
+
+		File bookInfo = new File("H://BookManagementSys//bookInfo.txt");// 将TreeMap的实例library的所有数据都保存到这个文件里
+		if (!bookInfo.exists()) {// 如果该文件不存在，则新建该文件
 			try {
 				bookInfo.createNewFile();
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		}else{
-			
 		}
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(bookInfo));
+			bw.write(bookAttribute.toString());
+			bw.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		System.out.println("保存成功！！\n");
+		mainMenu();
+
 	}
-	
-	public void read(){
+
+	public void read() {
 		File bookInfo = new File("H://BookManagementSys//bookInfo.txt");
 		BufferedReader reader = null;
 		String tmpString = null;
@@ -198,23 +227,33 @@ public class BooksManagementSys {
 				e.printStackTrace();
 			}
 		}
-		 try {
+		try {
 			reader = new BufferedReader(new FileReader(bookInfo));
-			while((tmpString = reader.readLine())!=null){
-			String tmpArray[] = tmpString.split(",");
-			for (String bookAttribute : tmpArray) {
-				System.out.print(bookAttribute+"\t");
+			while ((tmpString = reader.readLine()) != null) {
+				String tmpArray[] = tmpString.split(",");
+				book = new Book();
+				book.setBookId(tmpArray[0]);
+				book.setBookName(tmpArray[1]);
+				book.setBookAuthor(tmpArray[2]);
+				book.setBookPress(tmpArray[3]);
+				book.setBookSum(tmpArray[4]);
+				book.setInLibrarySum(tmpArray[5]);
+				book.setBookAddress(tmpArray[6]);
+				book.setBorrowSum(tmpArray[7]);
+				book.setBuyDate(tmpArray[8]);
+				book.setDeleteDate(tmpArray[9]);
+				library.put(book.getBookId(), book);
 			}
-			}
+			display();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-		}  
+		}
 	}
 
 	public void exit() {
-		save();
-		System.out.println("退出系统");
+		System.out.println("已退出系统，欢迎再次使用");
+		System.exit(0);
 	}
 
 	/**
@@ -230,7 +269,8 @@ public class BooksManagementSys {
 			b = library.get(bookIds.next());
 			System.out.println(b.getBookId() + "\t" + b.getBookName() + "\t" + b.getBookAuthor() + "\t"
 					+ b.getBookPress() + "\t" + b.getBookAddress() + "\t" + b.getBookSum() + "\t" + b.getInLibrarySum()
-					+ "\t" + b.getBorrowSum());
+					+ "\t" + b.getBorrowSum() + "\t" + b.getBuyDate() + "\t" + b.getDeleteDate());
+
 		}
 
 	}
@@ -251,6 +291,7 @@ public class BooksManagementSys {
 	}
 
 	public static void main(String[] args) {
-		new BooksManagementSys().read();
+		new BooksManagementSys().login();
+
 	}
 }
