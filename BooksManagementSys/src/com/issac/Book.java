@@ -11,6 +11,15 @@ public class Book {
 	private String borrowSum;// 借阅次数
 	private String deleteDate;// 删除时间
 	private String buyDate;// 录入时间
+	private String deleteReason;// 删除原因
+
+	public String getDeleteReason() {
+		return deleteReason;
+	}
+
+	public void setDeleteReason(String deleteReason) {
+		this.deleteReason = deleteReason;
+	}
 
 	public String getBookId() {
 		return bookId;

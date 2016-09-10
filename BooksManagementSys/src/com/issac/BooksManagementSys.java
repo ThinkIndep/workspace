@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Formattable;
 import java.util.Iterator;
 import java.util.Scanner;
 import java.util.Set;
@@ -18,6 +19,8 @@ public class BooksManagementSys {
 
 	private Book book;
 	private TreeMap<String, Book> library = new TreeMap<String, Book>();
+	private TreeMap<String, Book> deleteBook = new TreeMap<>();
+	private TreeMap<String, Reader> readers = new TreeMap<>();
 	private Reader reader;
 
 	public Book getBook() {
@@ -216,12 +219,47 @@ public class BooksManagementSys {
 		System.out.println("图书编号：" + book.getBookId() + "\n" + "图书名称：" + book.getBookName() + "\n" + "图书作者："
 				+ book.getBookAuthor() + "\n" + "出版社：" + book.getBookPress() + "\n" + "现存地址：" + book.getBookAddress()
 				+ "\n" + "图书总数：" + book.getBookSum() + "\n" + "在馆数：" + book.getInLibrarySum());
-		//library.put(book.getBookId(), book);
+		// library.put(book.getBookId(), book);
 		mainMenu();
 	}
 
 	public void deleteBook() {
-		System.out.println("删除图书");
+		Scanner input = new Scanner(System.in);
+		System.out.print("请输入要删除图书的编号：");
+		String bookId = input.nextLine();
+		while (bookId.equals("")) {
+			System.out.print("输入不能为空!!!\n请重新输入图书编号：");
+			bookId = input.nextLine();
+		}
+		while (!isNumeric(bookId)) {
+			System.out.print("输入有误！！图书编号只能由数字组成！！\n请重新输入图书编号：");
+			bookId = input.nextLine();
+		}
+		if (library.get(bookId) == null) {
+			System.out.print("此图书不存在，请重新输入正确的图书编号：");
+			bookId = input.nextLine();
+		}
+		book = library.get(bookId);
+		System.out.println("图书名称\t图书作者\n" + book.getBookName() + "\t" + book.getBookAuthor());
+		System.out.println("删除前：在馆数/图书总数：" + book.getInLibrarySum() + "/" + book.getBookSum());
+		System.out.print("请输入删除原因：");
+		String deleteReason = input.nextLine();
+		book.setDeleteReason(deleteReason);
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");// 删除时间从系统获取
+		book.setDeleteDate(df.format(new Date()));
+		System.out.println("请输入删除后的图书数量：");
+		System.out.print("1.图书总数：");
+		String bookSum = input.nextLine();
+		book.setBookSum(bookSum);
+		System.out.print("2.在馆数：");
+		String inLibrarySum = input.nextLine();
+		book.setInLibrarySum(inLibrarySum);
+		if (book.getBookSum().equals("0")) {
+			library.remove(bookId);
+		}
+		deleteBook.put(book.getDeleteDate(), book);
+		System.out.println("删除成功！！");
+		mainMenu();
 	}
 
 	public void queryBook() {
@@ -240,7 +278,13 @@ public class BooksManagementSys {
 		System.out.println("信息统计");
 	}
 
+	/**
+	 * 将修改后的数据写入文件里
+	 */
 	public void save() {
+		/**
+		 * 将新增图书写入文件
+		 */
 		Iterator<String> bookIds = library.keySet().iterator();
 		StringBuilder bookAttribute = new StringBuilder();
 		while (bookIds.hasNext()) {
@@ -268,12 +312,49 @@ public class BooksManagementSys {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
 		}
+
+		/**
+		 * 将删除图书的信息写入文件
+		 */
+		Iterator<String> deleteIds = deleteBook.keySet().iterator();
+		StringBuilder deleteBookAttribute = new StringBuilder();
+		while (deleteIds.hasNext()) {
+			book = deleteBook.get(deleteIds.next());
+			deleteBookAttribute.append(book.getBookId() + "," + book.getBookName() + "," + book.getBookAuthor() + ","
+					+ book.getBookPress() + "," + book.getBookSum() + "," + book.getInLibrarySum() + ","
+					+ book.getBookAddress() + "," + book.getBorrowSum() + "," + book.getBuyDate() + ","
+					+ book.getDeleteDate() + "," + book.getDeleteReason() + "\r\n");
+		}
+
+		File deleteBookInfo = new File("H://BookManagementSys//deleteBookInfo.txt");// 将TreeMap的实例deleteBooks的所有数据都保存到这个文件里
+		if (!deleteBookInfo.exists()) {// 如果该文件不存在，则新建该文件
+			try {
+				deleteBookInfo.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			BufferedWriter bw = new BufferedWriter(new FileWriter(deleteBookInfo));
+			bw.write(deleteBookAttribute.toString());
+			bw.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		System.out.println("保存成功！！\n");
 		mainMenu();
 
 	}
 
+	/**
+	 * 读取磁盘中文件的信息
+	 */
 	public void read() {
+		/**
+		 * 读取购买的图书信息
+		 */
 		File bookInfo = new File("H://BookManagementSys//bookInfo.txt");
 		BufferedReader reader = null;
 		String tmpString = null;
@@ -303,6 +384,41 @@ public class BooksManagementSys {
 				library.put(book.getBookId(), book);
 			}
 			display();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/**
+		 * 读取被删除图书的信息
+		 */
+		File deleteBookInfo = new File("H://BookManagementSys//deleteBookInfo.txt");
+
+		if (!deleteBookInfo.exists()) {
+			try {
+				deleteBookInfo.createNewFile();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		try {
+			reader = new BufferedReader(new FileReader(deleteBookInfo));
+			while ((tmpString = reader.readLine()) != null) {
+				String tmpArray[] = tmpString.split(",");
+				book = new Book();
+				book.setBookId(tmpArray[0]);
+				book.setBookName(tmpArray[1]);
+				book.setBookAuthor(tmpArray[2]);
+				book.setBookPress(tmpArray[3]);
+				book.setBookSum(tmpArray[4]);
+				book.setInLibrarySum(tmpArray[5]);
+				book.setBookAddress(tmpArray[6]);
+				book.setBorrowSum(tmpArray[7]);
+				book.setBuyDate(tmpArray[8]);
+				book.setDeleteDate(tmpArray[9]);
+				book.setDeleteReason(tmpArray[10]);
+				deleteBook.put(book.getDeleteDate(), book);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
