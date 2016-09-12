@@ -1,13 +1,10 @@
 package com.issac;
 
-import java.util.TreeMap;
-
 public class Reader {
 	private String readerId;
 	private String readerName;
 	private String readerPhone;
 	private String readerGender;
-	private TreeMap<String, BorrowInfo> borrowBooks;
 
 	public String getReaderId() {
 		return readerId;
@@ -41,11 +38,4 @@ public class Reader {
 		this.readerGender = readerGender;
 	}
 
-	public TreeMap<String, BorrowInfo> getBorrowBooks() {
-		return borrowBooks;
-	}
-
-	public void setBorrowBooks(TreeMap<String, BorrowInfo> borrowBooks) {
-		this.borrowBooks = borrowBooks;
-	}
 }

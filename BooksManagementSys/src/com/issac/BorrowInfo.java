@@ -1,12 +1,11 @@
 package com.issac;
 
-import java.sql.Date;
-
 public class BorrowInfo {
 	private String borrowId;
+	private String readerId;
 	private String borrowBookId;
-	private Date borrowDate;
-	private Date returnDae;
+	private String borrowDate;
+	private String returnDate;
 
 	public String getBorrowId() {
 		return borrowId;
@@ -14,6 +13,14 @@ public class BorrowInfo {
 
 	public void setBorrowId(String borrowId) {
 		this.borrowId = borrowId;
+	}
+
+	public String getReaderId() {
+		return readerId;
+	}
+
+	public void setReaderId(String readerId) {
+		this.readerId = readerId;
 	}
 
 	public String getBorrowBookId() {
@@ -24,19 +31,19 @@ public class BorrowInfo {
 		this.borrowBookId = borrowBookId;
 	}
 
-	public Date getBorrowDate() {
+	public String getBorrowDate() {
 		return borrowDate;
 	}
 
-	public void setBorrowDate(Date borrowDate) {
+	public void setBorrowDate(String borrowDate) {
 		this.borrowDate = borrowDate;
 	}
 
-	public Date getReturnDae() {
-		return returnDae;
+	public String getReturnDate() {
+		return returnDate;
 	}
 
-	public void setReturnDae(Date returnDae) {
-		this.returnDae = returnDae;
+	public void setReturnDate(String returnDae) {
+		this.returnDate = returnDae;
 	}
 }

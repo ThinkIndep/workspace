@@ -9,10 +9,8 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Formattable;
 import java.util.Iterator;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.TreeMap;
 
 public class BooksManagementSys {
@@ -21,7 +19,10 @@ public class BooksManagementSys {
 	private TreeMap<String, Book> library = new TreeMap<String, Book>();
 	private TreeMap<String, Book> deleteBook = new TreeMap<>();
 	private TreeMap<String, Reader> readers = new TreeMap<>();
+	private BorrowInfo borrowInfo;
+	private TreeMap<String, BorrowInfo> borrowInfoMap = new TreeMap<>();
 	private Reader reader;
+	private Scanner input = new Scanner(System.in);
 
 	public Book getBook() {
 		return book;
@@ -51,7 +52,6 @@ public class BooksManagementSys {
 		System.out.println("#####欢迎使用GUET图书管理系统#####\n");
 		System.out.print(
 				"主菜单:\n1.新增图书\n2.借/还图书\n3.修改图书信息\n4.删除图书\n5.查找图书\n6.新增管理员\n7.读者管理\n8.信息统计\n9.保存修改\n10.退出系统\n请选择要执行的操作：");
-		Scanner input = new Scanner(System.in);
 		int option = input.nextInt();
 		switch (option) {
 		case 1:
@@ -89,7 +89,6 @@ public class BooksManagementSys {
 			mainMenu();
 			break;
 		}
-		input.close();
 	}
 
 	public void login() {
@@ -100,7 +99,8 @@ public class BooksManagementSys {
 	public void addBook() {
 
 		System.out.print("请输入图书编号：");
-		Scanner input = new Scanner(System.in);
+		// System.out.println(input.nextLine());
+		input.nextLine();
 		String bookid = input.nextLine();
 		while (bookid.equals("")) {
 			System.out.print("输入不能为空!!!\n请重新输入图书编号：");
@@ -158,14 +158,74 @@ public class BooksManagementSys {
 	}
 
 	public void borrowOrReturnBook() {
-		System.out.println("借/还图书");
+		System.out.println("1.借书\n2.还书");
+		System.out.print("请选择要执行的操作：");
+		String option = input.nextLine();
+		if (option.equals("1")) {
+			borrowBook();
+		} else if (option.equals("2")) {
+			returnBook();
+		} else {
+			System.out.println("输入有误！！请从新输入");
+			borrowOrReturnBook();
+		}
+		mainMenu();
+	}
+
+	public void borrowBook() {
+		System.out.print("请输入要借阅书籍编号:");
+		String bookId = input.nextLine();
+		while ((book = library.get(bookId)) == null) {// 如果图书馆中找不到这本书
+			System.out.print("输入有误！！请重新输入:");
+			bookId = input.nextLine();
+		}
+		if (book.getInLibrarySum().equals("0")) {// 如果此书在图书馆中已经被借完
+			System.out.println("此书已借完!!");
+			return;
+		}
+		System.out.println("书名：" + book.getBookName() + "\t" + "作者:" + book.getBookAuthor());
+		System.out.print("请输入读者编号：");
+		String readerId = input.nextLine();
+		while ((reader = readers.get(readerId)) == null) {
+			System.out.print("输入有误！！！请重新输入:");
+			readerId = input.nextLine();
+		}
+		String inLibrarySum = String.valueOf(Integer.valueOf(book.getInLibrarySum()) - 1);// 借书成功则将此书在馆数-1
+		book.setInLibrarySum(inLibrarySum);
+		borrowInfo = new BorrowInfo();// 将借阅信息记录下来
+		if (borrowInfoMap.keySet().isEmpty()) {// 如果是本系统第一次借阅，则借阅编号从11111开始
+			borrowInfo.setBorrowId("11111");
+		} else {
+			borrowInfo.setBorrowBookId(newId(borrowInfoMap.lastKey()));
+		}
+		borrowInfo.setReaderId(reader.getReaderId());
+		borrowInfo.setBorrowBookId(book.getBookId());
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 借书时间从系统获取
+		borrowInfo.setBorrowDate(df.format(new Date()));
+		borrowInfoMap.put(borrowInfo.getBorrowId(), borrowInfo);
+		System.out.println("借书成功！！");
+	}
+
+	public void returnBook() {
+		System.out.print("请输入借阅编号:");
+		String borrowId = input.nextLine();
+		while ((borrowInfo = borrowInfoMap.get(borrowId)) == null) {
+			System.out.print("输入有误！！！请重新输入:");
+			borrowId = input.nextLine();
+		}
+		book = library.get(borrowInfo.getBorrowBookId());
+		String inLibrarySum = String.valueOf(Integer.valueOf(book.getInLibrarySum() + 1));
+		book.setInLibrarySum(inLibrarySum);
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 还书时间从系统获取
+		borrowInfo.setReturnDate(df.format(new Date()));
+		System.out.println("还书成功！！");
+
 	}
 
 	/**
 	 * 修改图书信息
 	 */
 	public void modifyBookInfo() {
-		Scanner input = new Scanner(System.in);
 		System.out.print("请输入要修改图书的编号：");
 		String bookId = input.nextLine();
 		while (bookId.equals("")) {
@@ -224,7 +284,6 @@ public class BooksManagementSys {
 	}
 
 	public void deleteBook() {
-		Scanner input = new Scanner(System.in);
 		System.out.print("请输入要删除图书的编号：");
 		String bookId = input.nextLine();
 		while (bookId.equals("")) {
@@ -245,7 +304,7 @@ public class BooksManagementSys {
 		System.out.print("请输入删除原因：");
 		String deleteReason = input.nextLine();
 		book.setDeleteReason(deleteReason);
-		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");// 删除时间从系统获取
+		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 删除时间从系统获取
 		book.setDeleteDate(df.format(new Date()));
 		System.out.println("请输入删除后的图书数量：");
 		System.out.print("1.图书总数：");
@@ -257,7 +316,13 @@ public class BooksManagementSys {
 		if (book.getBookSum().equals("0")) {
 			library.remove(bookId);
 		}
-		deleteBook.put(book.getDeleteDate(), book);
+		String deleteId = "";
+		if (deleteBook.keySet().isEmpty()) {
+			deleteId = "11111";
+		} else {
+			deleteId = newId(deleteBook.lastKey());
+		}
+		deleteBook.put(deleteId, book);
 		System.out.println("删除成功！！");
 		mainMenu();
 	}
@@ -271,7 +336,75 @@ public class BooksManagementSys {
 	}
 
 	public void readerManagement() {
-		System.out.println("读者管理");
+		System.out.println("1.新增读者\n2.查询读者");
+		System.out.print("请选择要执行的操作:");
+		String option = input.nextLine();
+		if (option.equals("1")) {
+			addReader();
+		} else if (option.equals("2")) {
+			queryReader();
+		} else {
+			System.out.println("输入有误,请重新输入！！");
+			readerManagement();
+		}
+	}
+
+	public void addReader() {
+		reader = new Reader();
+		System.out.print("请输入读者编号：");
+		String readerId = input.nextLine();
+		reader.setReaderId(readerId);
+		System.out.print("请输入读者姓名：");
+		String readerName = input.nextLine();
+		reader.setReaderName(readerName);
+		System.out.print("请输入读者电话号码：");
+		String readerPhone = input.nextLine();
+		reader.setReaderPhone(readerPhone);
+		System.out.print("请输入读者性别：");
+		String readerGender = input.nextLine();
+		reader.setReaderGender(readerGender);
+		readers.put(reader.getReaderId(), reader);
+		System.out.println("添加成功！！");
+		mainMenu();
+	}
+
+	public void deleteReader() {
+		System.out.print("请输入读者编号：");
+		String readerId = input.nextLine();
+		if (readers.get(readerId) == null) {
+			System.out.print("读者不存在，请输入正确的读者编号:");
+			readerId = input.nextLine();
+		}
+		System.out.println("读者姓名:" + readers.get(readerId).getReaderName());
+		readers.remove(readerId);
+		System.out.println("删除成功！！");
+		mainMenu();
+	}
+
+	public void queryReader() {
+		System.out.print("请输入读者编号：");
+		String readerId = input.nextLine();
+		while (readers.get(readerId) == null) {
+			System.out.print("读者不存在，请输入正确的读者编号:");
+			readerId = input.nextLine();
+		}
+		reader = readers.get(readerId);
+		System.out.println("读者信息:\n" + "编号：" + reader.getReaderId() + "\n" + "姓名:" + reader.getReaderName() + "\n"
+				+ "电话号码:" + reader.getReaderPhone() + "\n" + "性别:" + reader.getReaderGender());
+
+		// 将读者的借阅图书的所有信息列出
+		Iterator<String> borrowIds = borrowInfoMap.keySet().iterator();
+		System.out.println("#####读者借书记录#####");
+		System.out.println("书籍编号" + "\t" + "书籍名称" + "\t" + "借书时间" + "\t" + "还书时间");
+		while (borrowIds.hasNext()) {
+			borrowInfo = borrowInfoMap.get(borrowIds.next());
+			if (borrowInfo.getReaderId().equals(readerId)) {
+				book = library.get(borrowInfo.getBorrowBookId());
+				System.out.println(book.getBookId() + "\t" + book.getBookName() + "\t" + borrowInfo.getBorrowDate()
+						+ "\t" + borrowInfo.getReturnDate());
+			}
+		}
+		mainMenu();
 	}
 
 	public void infoStatistics() {
@@ -282,67 +415,88 @@ public class BooksManagementSys {
 	 * 将修改后的数据写入文件里
 	 */
 	public void save() {
+
+		Iterator<String> iterator;
+		StringBuilder stringBuilder = new StringBuilder();
+		File file;
 		/**
 		 * 将新增图书写入文件
 		 */
-		Iterator<String> bookIds = library.keySet().iterator();
-		StringBuilder bookAttribute = new StringBuilder();
-		while (bookIds.hasNext()) {
-			book = library.get(bookIds.next());
-			bookAttribute.append(
+		iterator = library.keySet().iterator();
+		while (iterator.hasNext()) {
+			book = library.get(iterator.next());
+			stringBuilder.append(
 					book.getBookId() + "," + book.getBookName() + "," + book.getBookAuthor() + "," + book.getBookPress()
 							+ "," + book.getBookSum() + "," + book.getInLibrarySum() + "," + book.getBookAddress() + ","
 							+ book.getBorrowSum() + "," + book.getBuyDate() + "," + book.getDeleteDate() + "\r\n");
 		}
 
-		File bookInfo = new File("H://BookManagementSys//bookInfo.txt");// 将TreeMap的实例library的所有数据都保存到这个文件里
-		if (!bookInfo.exists()) {// 如果该文件不存在，则新建该文件
-			try {
-				bookInfo.createNewFile();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		file = new File("H://BookManagementSys//bookInfo.txt");// 将TreeMap的实例library的所有数据都保存到这个文件里
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(bookInfo));
-			bw.write(bookAttribute.toString());
+			if (!file.exists()) {// 如果该文件不存在，则新建该文件
+				file.createNewFile();
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			// System.out.println(stringBuilder.toString());
+			bw.write(stringBuilder.toString());
+			stringBuilder.delete(0, stringBuilder.length());
+			// System.out.println(stringBuilder.toString());
 			bw.close();
-		} catch (IOException e1) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
-
 		/**
 		 * 将删除图书的信息写入文件
 		 */
-		Iterator<String> deleteIds = deleteBook.keySet().iterator();
-		StringBuilder deleteBookAttribute = new StringBuilder();
-		while (deleteIds.hasNext()) {
-			book = deleteBook.get(deleteIds.next());
-			deleteBookAttribute.append(book.getBookId() + "," + book.getBookName() + "," + book.getBookAuthor() + ","
+		iterator = deleteBook.keySet().iterator();
+		while (iterator.hasNext()) {
+			book = deleteBook.get(iterator.next());
+			stringBuilder.append(book.getBookId() + "," + book.getBookName() + "," + book.getBookAuthor() + ","
 					+ book.getBookPress() + "," + book.getBookSum() + "," + book.getInLibrarySum() + ","
 					+ book.getBookAddress() + "," + book.getBorrowSum() + "," + book.getBuyDate() + ","
 					+ book.getDeleteDate() + "," + book.getDeleteReason() + "\r\n");
 		}
 
-		File deleteBookInfo = new File("H://BookManagementSys//deleteBookInfo.txt");// 将TreeMap的实例deleteBooks的所有数据都保存到这个文件里
-		if (!deleteBookInfo.exists()) {// 如果该文件不存在，则新建该文件
-			try {
-				deleteBookInfo.createNewFile();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		file = new File("H://BookManagementSys//deleteBookInfo.txt");// 将TreeMap的实例deleteBooks的所有数据都保存到这个文件里
 		try {
-			BufferedWriter bw = new BufferedWriter(new FileWriter(deleteBookInfo));
-			bw.write(deleteBookAttribute.toString());
+			if (!file.exists()) {// 如果该文件不存在，则新建该文件
+				file.createNewFile();
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			bw.write(stringBuilder.toString());
+			stringBuilder.delete(0, stringBuilder.length());
 			bw.close();
-		} catch (IOException e1) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			e.printStackTrace();
 		}
+		/**
+		 * 将读者信息写入文件里
+		 */
+		iterator = readers.keySet().iterator();
+		while (iterator.hasNext()) {
+			reader = readers.get(iterator.next());
+			stringBuilder.append(reader.getReaderId() + "," + reader.getReaderName() + "," + reader.getReaderPhone()
+					+ "," + reader.getReaderGender() + "\r\n");
+		}
+		file = new File("H://BookManagementSys//readerInfo.txt");
+
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			// System.out.println(stringBuilder.toString());
+			bw.write(stringBuilder.toString());
+			stringBuilder.delete(0, stringBuilder.length());
+			// System.out.println(stringBuilder.toString());
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		System.out.println("保存成功！！\n");
 		mainMenu();
 
@@ -352,24 +506,22 @@ public class BooksManagementSys {
 	 * 读取磁盘中文件的信息
 	 */
 	public void read() {
+		File file;
+		BufferedReader bufferedReader = null;
+		String tmpString = null;
+		String tmpArray[];
 		/**
 		 * 读取购买的图书信息
 		 */
-		File bookInfo = new File("H://BookManagementSys//bookInfo.txt");
-		BufferedReader reader = null;
-		String tmpString = null;
-		if (!bookInfo.exists()) {
-			try {
-				bookInfo.createNewFile();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+		file = new File("H://BookManagementSys//bookInfo.txt");
+
 		try {
-			reader = new BufferedReader(new FileReader(bookInfo));
-			while ((tmpString = reader.readLine()) != null) {
-				String tmpArray[] = tmpString.split(",");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			bufferedReader = new BufferedReader(new FileReader(file));
+			while ((tmpString = bufferedReader.readLine()) != null) {
+				tmpArray = tmpString.split(",");
 				book = new Book();
 				book.setBookId(tmpArray[0]);
 				book.setBookName(tmpArray[1]);
@@ -391,20 +543,16 @@ public class BooksManagementSys {
 		/**
 		 * 读取被删除图书的信息
 		 */
-		File deleteBookInfo = new File("H://BookManagementSys//deleteBookInfo.txt");
+		file = new File("H://BookManagementSys//deleteBookInfo.txt");
 
-		if (!deleteBookInfo.exists()) {
-			try {
-				deleteBookInfo.createNewFile();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
 		try {
-			reader = new BufferedReader(new FileReader(deleteBookInfo));
-			while ((tmpString = reader.readLine()) != null) {
-				String tmpArray[] = tmpString.split(",");
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			bufferedReader = new BufferedReader(new FileReader(file));
+			String delelteId = "11110";
+			while ((tmpString = bufferedReader.readLine()) != null) {
+				tmpArray = tmpString.split(",");
 				book = new Book();
 				book.setBookId(tmpArray[0]);
 				book.setBookName(tmpArray[1]);
@@ -417,7 +565,29 @@ public class BooksManagementSys {
 				book.setBuyDate(tmpArray[8]);
 				book.setDeleteDate(tmpArray[9]);
 				book.setDeleteReason(tmpArray[10]);
-				deleteBook.put(book.getDeleteDate(), book);
+				delelteId = newId(delelteId);
+				deleteBook.put(delelteId, book);// 这里有问题
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		/**
+		 * 读取读者信息
+		 */
+		file = new File("H://BookManagementSys//readerInfo.txt");
+		try {
+			if (file.exists()) {
+				bufferedReader = new BufferedReader(new FileReader(file));
+				while ((tmpString = bufferedReader.readLine()) != null) {
+					tmpArray = tmpString.split(",");
+					reader = new Reader();
+					reader.setReaderId(tmpArray[0]);
+					reader.setReaderName(tmpArray[1]);
+					reader.setReaderPhone(tmpArray[2]);
+					reader.setReaderGender(tmpArray[3]);
+					readers.put(reader.getReaderId(), reader);
+				}
 			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -450,9 +620,21 @@ public class BooksManagementSys {
 	}
 
 	/**
+	 * 以自增的方式生成新的Id号
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public String newId(String key) {
+		key = String.valueOf(Integer.valueOf(key) + 1);
+		return key;
+	}
+
+	/**
 	 * 判断字符串是否为数字
 	 * 
 	 * @param str
+	 *            待判断的字符串
 	 * @return
 	 */
 	public boolean isNumeric(String str) {
