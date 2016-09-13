@@ -196,8 +196,9 @@ public class BooksManagementSys {
 		if (borrowInfoMap.keySet().isEmpty()) {// 如果是本系统第一次借阅，则借阅编号从11111开始
 			borrowInfo.setBorrowId("11111");
 		} else {
-			borrowInfo.setBorrowBookId(newId(borrowInfoMap.lastKey()));
+			borrowInfo.setBorrowId(newId(borrowInfoMap.lastKey()));
 		}
+		System.out.println();
 		borrowInfo.setReaderId(reader.getReaderId());
 		borrowInfo.setBorrowBookId(book.getBookId());
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 借书时间从系统获取
@@ -496,6 +497,30 @@ public class BooksManagementSys {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		/**
+		 * 将借阅记录写入文件
+		 */
+		iterator = borrowInfoMap.keySet().iterator();
+		while (iterator.hasNext()) {
+			borrowInfo = borrowInfoMap.get(iterator.next());
+			stringBuilder.append(
+					borrowInfo.getBorrowId() + "," + borrowInfo.getReaderId() + "," + borrowInfo.getBorrowBookId() + ","
+							+ borrowInfo.getBorrowDate() + "," + borrowInfo.getReturnDate() + "\r\n");
+		}
+		file = new File("H://BookManagementSys//borrowInfo.txt");
+
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			bw.write(stringBuilder.toString());
+			stringBuilder.delete(0, stringBuilder.length());
+			bw.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		System.out.println("保存成功！！\n");
 		mainMenu();
@@ -593,6 +618,28 @@ public class BooksManagementSys {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		/**
+		 * 读取借阅记录
+		 */
+		file = new File("H://BookManagementSys//borrowInfo.txt");
+		try {
+			if (file.exists()) {
+				bufferedReader = new BufferedReader(new FileReader(file));
+				while ((tmpString = bufferedReader.readLine()) != null) {
+					tmpArray = tmpString.split(",");
+					borrowInfo = new BorrowInfo();
+					borrowInfo.setBorrowId(tmpArray[0]);
+					borrowInfo.setReaderId(tmpArray[1]);
+					borrowInfo.setBorrowBookId(tmpArray[2]);
+					borrowInfo.setBorrowDate(tmpArray[3]);
+					borrowInfo.setReturnDate(tmpArray[4]);
+					borrowInfoMap.put(borrowInfo.getBorrowId(), borrowInfo);
+				}
+			}
+		} catch (IOException e) {
+			// TODO: handle exception
+		}
+
 	}
 
 	public void exit() {
