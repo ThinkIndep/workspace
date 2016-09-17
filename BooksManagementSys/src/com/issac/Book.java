@@ -8,7 +8,7 @@ public class Book {
 	private String bookAddress;// 现存地址
 	private String bookSum;// 总共册数
 	private String inLibrarySum;// 在馆数
-	private String borrowSum;// 借阅次数
+	private String borrowSum="0";// 借阅次数
 	private String deleteDate;// 删除时间
 	private String buyDate;// 录入时间
 	private String deleteReason;// 删除原因

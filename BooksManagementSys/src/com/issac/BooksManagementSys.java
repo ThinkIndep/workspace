@@ -8,8 +8,14 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -23,6 +29,7 @@ public class BooksManagementSys {
 	private TreeMap<String, BorrowInfo> borrowInfoMap = new TreeMap<>();
 	private Reader reader;
 	private Scanner input = new Scanner(System.in);
+	private TreeMap<String, Book> queryBook = new TreeMap<String, Book>();
 
 	public Book getBook() {
 		return book;
@@ -151,7 +158,7 @@ public class BooksManagementSys {
 			library.put(book.getBookId(), book);// 将录入的新书暂存在TreeMap的实例library中
 		}
 		System.out.println("书籍添加成功！！");
-		display();
+		display(library);
 		// input.close();
 		mainMenu();
 
@@ -172,12 +179,17 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 借书
+	 */
 	public void borrowBook() {
 		System.out.print("请输入要借阅书籍编号:");
 		String bookId = input.nextLine();
-		while ((book = library.get(bookId)) == null) {// 如果图书馆中找不到这本书
+		book = library.get(bookId);
+		while (book == null) {// 如果图书馆中找不到这本书
 			System.out.print("输入有误！！请重新输入:");
 			bookId = input.nextLine();
+			book = library.get(bookId);
 		}
 		if (book.getInLibrarySum().equals("0")) {// 如果此书在图书馆中已经被借完
 			System.out.println("此书已借完!!");
@@ -192,13 +204,14 @@ public class BooksManagementSys {
 		}
 		String inLibrarySum = String.valueOf(Integer.valueOf(book.getInLibrarySum()) - 1);// 借书成功则将此书在馆数-1
 		book.setInLibrarySum(inLibrarySum);
+		String borrowSum = String.valueOf(Integer.parseInt(book.getBorrowSum().trim()) + 1);// 借阅次数+1
+		book.setBorrowSum(borrowSum);
 		borrowInfo = new BorrowInfo();// 将借阅信息记录下来
 		if (borrowInfoMap.keySet().isEmpty()) {// 如果是本系统第一次借阅，则借阅编号从11111开始
 			borrowInfo.setBorrowId("11111");
 		} else {
 			borrowInfo.setBorrowId(newId(borrowInfoMap.lastKey()));
 		}
-		System.out.println();
 		borrowInfo.setReaderId(reader.getReaderId());
 		borrowInfo.setBorrowBookId(book.getBookId());
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 借书时间从系统获取
@@ -207,6 +220,9 @@ public class BooksManagementSys {
 		System.out.println("借书成功！！");
 	}
 
+	/**
+	 * 还书
+	 */
 	public void returnBook() {
 		System.out.print("请输入借阅编号:");
 		String borrowId = input.nextLine();
@@ -215,7 +231,7 @@ public class BooksManagementSys {
 			borrowId = input.nextLine();
 		}
 		book = library.get(borrowInfo.getBorrowBookId());
-		String inLibrarySum = String.valueOf(Integer.valueOf(book.getInLibrarySum() + 1));
+		String inLibrarySum = String.valueOf(Integer.valueOf(book.getInLibrarySum()) + 1);// 还书则将在馆数+1
 		book.setInLibrarySum(inLibrarySum);
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 还书时间从系统获取
 		borrowInfo.setReturnDate(df.format(new Date()));
@@ -328,8 +344,99 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 查找图书
+	 */
 	public void queryBook() {
-		System.out.println("查找图书");
+		List<String> removeBookId = new ArrayList<>();
+		// TreeMap<String, Book> removeBook = new TreeMap<>();//
+		// 多条件查询时用来筛除不符合条件的Book
+		Iterator<String> iterator;
+		Scanner input = new Scanner(System.in);
+		System.out.print("1.按图书编号\n2.按书名\n3.按作者\n4.按出版社\n请选择要查找的方式(若要多条件联合查询，请用逗号将查找方式隔开，例如：1,2):");
+		String queryMethod = input.nextLine();
+		String[] queryMethodArray = queryMethod.split(",");
+		for (String method : queryMethodArray) {
+			if (method.equals("1")) {
+				iterator = library.keySet().iterator();
+				System.out.print("请输入书籍编号:");
+				String bookId = input.nextLine();
+				while (iterator.hasNext()) {
+					if (iterator.next().indexOf(bookId) > -1) {
+						queryBook.put(bookId, library.get(bookId));
+					}
+				}
+				iterator = queryBook.keySet().iterator();
+				while (iterator.hasNext()) {
+					String queryBookId = iterator.next();
+					if (!queryBook.get(bookId).getBookId().equals(queryBookId)) {
+						removeBookId.add(bookId);
+					}
+				}
+			} else if (method.equals("2")) {
+				iterator = library.keySet().iterator();
+				System.out.print("请输入书名:");
+				String bookName = input.nextLine();
+				while (iterator.hasNext()) {
+					String bookId = iterator.next();
+					if (library.get(bookId).getBookName().indexOf(bookName) > -1) {
+						queryBook.put(bookId, library.get(bookId));
+					}
+				}
+				iterator = queryBook.keySet().iterator();
+				while (iterator.hasNext()) {
+					String bookId = iterator.next();
+					if (!queryBook.get(bookId).getBookName().equals(bookName)) {
+						removeBookId.add(bookId);
+					}
+				}
+			} else if (method.equals("3")) {
+				iterator = library.keySet().iterator();
+				System.out.print("请输入作者:");
+				String author = input.nextLine();
+				while (iterator.hasNext()) {
+					String bookId = iterator.next();
+					if (library.get(bookId).getBookAuthor().indexOf(author) > -1) {
+						queryBook.put(bookId, library.get(bookId));
+					}
+				}
+				iterator = queryBook.keySet().iterator();
+				while (iterator.hasNext()) {
+					String bookId = iterator.next();
+					if (!queryBook.get(bookId).getBookAuthor().equals(author)) {
+						removeBookId.add(bookId);
+					}
+				}
+			} else if (method.equals("4")) {
+				iterator = library.keySet().iterator();
+				System.out.print("请输入出版社名称:");
+				String press = input.nextLine();
+				while (iterator.hasNext()) {
+					String bookId = iterator.next();
+					if (library.get(bookId).getBookPress().indexOf(press) > -1) {
+						queryBook.put(bookId, library.get(bookId));
+					}
+				}
+				iterator = queryBook.keySet().iterator();
+				while (iterator.hasNext()) {
+					String bookId = iterator.next();
+					if (!queryBook.get(bookId).getBookPress().equals(press)) {
+						removeBookId.add(bookId);
+					}
+				}
+			} else {
+				System.out.println("输入有误！！");
+				queryBook();
+			}
+		}
+		iterator = removeBookId.iterator();
+		while (iterator.hasNext()) {
+			queryBook.remove(iterator.next());
+		}
+		System.out.println("查询结果:");
+		display(queryBook);
+		queryBook.clear();
+		mainMenu();
 	}
 
 	public void addAdmin() {
@@ -396,20 +503,43 @@ public class BooksManagementSys {
 		// 将读者的借阅图书的所有信息列出
 		Iterator<String> borrowIds = borrowInfoMap.keySet().iterator();
 		System.out.println("#####读者借书记录#####");
-		System.out.println("书籍编号" + "\t" + "书籍名称" + "\t" + "借书时间" + "\t" + "还书时间");
+		System.out.println("借阅编号" + "\t" + "书籍编号" + "\t" + "书籍名称" + "\t" + "借书时间" + "\t" + "还书时间");
 		while (borrowIds.hasNext()) {
 			borrowInfo = borrowInfoMap.get(borrowIds.next());
 			if (borrowInfo.getReaderId().equals(readerId)) {
 				book = library.get(borrowInfo.getBorrowBookId());
-				System.out.println(book.getBookId() + "\t" + book.getBookName() + "\t" + borrowInfo.getBorrowDate()
-						+ "\t" + borrowInfo.getReturnDate());
+				System.out.println(borrowInfo.getBorrowId() + "\t" + book.getBookId() + "\t" + book.getBookName() + "\t"
+						+ borrowInfo.getBorrowDate() + "\t" + borrowInfo.getReturnDate());
 			}
 		}
 		mainMenu();
 	}
 
 	public void infoStatistics() {
-		System.out.println("信息统计");
+
+		Map<String, Book> borrowSumMap = new TreeMap<>();
+		List<Map.Entry<String, Book>> list = new ArrayList<Map.Entry<String, Book>>(library.entrySet());
+		Collections.sort(list, new Comparator<Map.Entry<String, Book>>() {
+			public int compare(Entry<String, Book> o1, Entry<String, Book> o2) {
+				int a = Integer.valueOf(o1.getValue().getBorrowSum());
+				int b = Integer.valueOf(o2.getValue().getBorrowSum());
+				if (a < b) {
+					return 1;
+				} else {
+					return -1;
+				}
+			}
+
+		});
+		System.out.println("图书借阅数量排序:");
+		System.out.println("图书编号" + "\t" + "图书名称" + "\t" + "图书作者" + "\t" + "图书出版社" + "\t" + "图书现存地址" + "\t" + "图书总数"
+				+ "\t" + "图书在馆数" + "\t" + "借阅次数" + "\t" + "购入时间");
+		for (Map.Entry<String, Book> mapping : list) {
+			Book b = library.get(mapping.getKey());
+			System.out.println(b.getBookId() + "\t" + b.getBookName() + "\t" + b.getBookAuthor() + "\t"
+					+ b.getBookPress() + "\t" + b.getBookAddress() + "\t" + b.getBookSum() + "\t" + b.getInLibrarySum()
+					+ "\t" + b.getBorrowSum() + "\t" + b.getBuyDate());
+		}
 	}
 
 	/**
@@ -560,7 +690,8 @@ public class BooksManagementSys {
 				book.setDeleteDate(tmpArray[9]);
 				library.put(book.getBookId(), book);
 			}
-			display();
+			System.out.println("所有图书信息:");
+			display(library);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -650,17 +781,16 @@ public class BooksManagementSys {
 	/**
 	 * 显示所有图书信息
 	 */
-	public void display() {
+	public void display(TreeMap<String, Book> treeMap) {
 		Book b = new Book();
-		Iterator<String> bookIds = library.keySet().iterator();
-		System.out.println("所有图书信息：");
+		Iterator<String> bookIds = treeMap.keySet().iterator();
 		System.out.println("图书编号" + "\t" + "图书名称" + "\t" + "图书作者" + "\t" + "图书出版社" + "\t" + "图书现存地址" + "\t" + "图书总数"
-				+ "\t" + "图书在馆数" + "\t" + "借阅次数");
+				+ "\t" + "图书在馆数" + "\t" + "借阅次数" + "\t" + "购入时间");
 		while (bookIds.hasNext()) {
 			b = library.get(bookIds.next());
 			System.out.println(b.getBookId() + "\t" + b.getBookName() + "\t" + b.getBookAuthor() + "\t"
 					+ b.getBookPress() + "\t" + b.getBookAddress() + "\t" + b.getBookSum() + "\t" + b.getInLibrarySum()
-					+ "\t" + b.getBorrowSum() + "\t" + b.getBuyDate() + "\t" + b.getDeleteDate());
+					+ "\t" + b.getBorrowSum() + "\t" + b.getBuyDate());
 
 		}
 

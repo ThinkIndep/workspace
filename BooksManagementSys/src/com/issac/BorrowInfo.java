@@ -5,7 +5,7 @@ public class BorrowInfo {
 	private String readerId;
 	private String borrowBookId;
 	private String borrowDate;
-	private String returnDate;
+	private String returnDate="Î´»¹";
 
 	public String getBorrowId() {
 		return borrowId;
