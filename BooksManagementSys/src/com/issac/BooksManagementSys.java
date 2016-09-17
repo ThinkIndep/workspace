@@ -12,11 +12,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class BooksManagementSys {
@@ -106,7 +108,6 @@ public class BooksManagementSys {
 	public void addBook() {
 
 		System.out.print("请输入图书编号：");
-		// System.out.println(input.nextLine());
 		input.nextLine();
 		String bookid = input.nextLine();
 		while (bookid.equals("")) {
@@ -516,8 +517,6 @@ public class BooksManagementSys {
 	}
 
 	public void infoStatistics() {
-
-		Map<String, Book> borrowSumMap = new TreeMap<>();
 		List<Map.Entry<String, Book>> list = new ArrayList<Map.Entry<String, Book>>(library.entrySet());
 		Collections.sort(list, new Comparator<Map.Entry<String, Book>>() {
 			public int compare(Entry<String, Book> o1, Entry<String, Book> o2) {
@@ -529,7 +528,6 @@ public class BooksManagementSys {
 					return -1;
 				}
 			}
-
 		});
 		System.out.println("图书借阅数量排序:");
 		System.out.println("图书编号" + "\t" + "图书名称" + "\t" + "图书作者" + "\t" + "图书出版社" + "\t" + "图书现存地址" + "\t" + "图书总数"
@@ -540,6 +538,30 @@ public class BooksManagementSys {
 					+ b.getBookPress() + "\t" + b.getBookAddress() + "\t" + b.getBookSum() + "\t" + b.getInLibrarySum()
 					+ "\t" + b.getBorrowSum() + "\t" + b.getBuyDate());
 		}
+		System.out.println("\n\n\n");
+
+		TreeMap<String, Book> bookMap = new TreeMap<>();
+		Set<String> bookRoom = new HashSet<>();
+		Iterator<String> iterator = library.keySet().iterator();
+		while (iterator.hasNext()) {
+			bookRoom.add(library.get(iterator.next()).getBookAddress());
+		}
+		Iterator<String> bookRoomIterator = bookRoom.iterator();
+		while (bookRoomIterator.hasNext()) {
+			String bookRoomName = bookRoomIterator.next();
+			iterator = library.keySet().iterator();
+			while (iterator.hasNext()) {
+				book = library.get(iterator.next());
+				if (book.getBookAddress().equals(bookRoomName)) {
+					bookMap.put(book.getBookId(), book);
+				}
+			}
+			System.out.println("######书库" + bookRoomName + "的藏书情况#######");
+			display(bookMap);
+			System.out.println("\n");
+			bookMap.clear();
+		}
+		mainMenu();
 	}
 
 	/**
