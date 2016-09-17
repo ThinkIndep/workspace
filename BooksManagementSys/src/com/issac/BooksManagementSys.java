@@ -31,7 +31,6 @@ public class BooksManagementSys {
 	private TreeMap<String, BorrowInfo> borrowInfoMap = new TreeMap<>();
 	private Reader reader;
 	private Scanner input = new Scanner(System.in);
-	private TreeMap<String, Book> queryBook = new TreeMap<String, Book>();
 
 	public Book getBook() {
 		return book;
@@ -350,6 +349,7 @@ public class BooksManagementSys {
 	 */
 	public void queryBook() {
 		List<String> removeBookId = new ArrayList<>();
+		TreeMap<String, Book> queryBook = new TreeMap<String, Book>();
 		// TreeMap<String, Book> removeBook = new TreeMap<>();//
 		// 多条件查询时用来筛除不符合条件的Book
 		Iterator<String> iterator;
@@ -362,77 +362,86 @@ public class BooksManagementSys {
 				iterator = library.keySet().iterator();
 				System.out.print("请输入书籍编号:");
 				String bookId = input.nextLine();
-				while (iterator.hasNext()) {
-					if (iterator.next().indexOf(bookId) > -1) {
-						queryBook.put(bookId, library.get(bookId));
+				if (queryBook.isEmpty()) {
+					while (iterator.hasNext()) {
+						if (iterator.next().indexOf(bookId) > -1) {
+							queryBook.put(bookId, library.get(bookId));
+						}
+					}
+				} else {
+					iterator = queryBook.keySet().iterator();
+					while (iterator.hasNext()) {
+						book = queryBook.get(iterator.next());
+						if (!book.getBookId().equals(bookId)) {
+							queryBook.remove(book.getBookId());
+						}
 					}
 				}
-				iterator = queryBook.keySet().iterator();
-				while (iterator.hasNext()) {
-					String queryBookId = iterator.next();
-					if (!queryBook.get(bookId).getBookId().equals(queryBookId)) {
-						removeBookId.add(bookId);
-					}
-				}
+
 			} else if (method.equals("2")) {
 				iterator = library.keySet().iterator();
 				System.out.print("请输入书名:");
 				String bookName = input.nextLine();
-				while (iterator.hasNext()) {
-					String bookId = iterator.next();
-					if (library.get(bookId).getBookName().indexOf(bookName) > -1) {
-						queryBook.put(bookId, library.get(bookId));
+				if (queryBook.isEmpty()) {
+					while (iterator.hasNext()) {
+						String bookId = iterator.next();
+						if (library.get(bookId).getBookName().indexOf(bookName) > -1) {
+							queryBook.put(bookId, library.get(bookId));
+						}
 					}
-				}
-				iterator = queryBook.keySet().iterator();
-				while (iterator.hasNext()) {
-					String bookId = iterator.next();
-					if (!queryBook.get(bookId).getBookName().equals(bookName)) {
-						removeBookId.add(bookId);
+				} else {
+					iterator = queryBook.keySet().iterator();
+					while (iterator.hasNext()) {
+						book = queryBook.get(iterator.next());
+						if (!book.getBookName().equals(bookName)) {
+							queryBook.remove(book.getBookId());
+						}
 					}
 				}
 			} else if (method.equals("3")) {
 				iterator = library.keySet().iterator();
 				System.out.print("请输入作者:");
 				String author = input.nextLine();
-				while (iterator.hasNext()) {
-					String bookId = iterator.next();
-					if (library.get(bookId).getBookAuthor().indexOf(author) > -1) {
-						queryBook.put(bookId, library.get(bookId));
+				if (queryBook.isEmpty()) {
+					while (iterator.hasNext()) {
+						String bookId = iterator.next();
+						if (library.get(bookId).getBookAuthor().indexOf(author) > -1) {
+							queryBook.put(bookId, library.get(bookId));
+						}
 					}
-				}
-				iterator = queryBook.keySet().iterator();
-				while (iterator.hasNext()) {
-					String bookId = iterator.next();
-					if (!queryBook.get(bookId).getBookAuthor().equals(author)) {
-						removeBookId.add(bookId);
+				} else {
+					iterator = queryBook.keySet().iterator();
+					while (iterator.hasNext()) {
+						book = queryBook.get(iterator.next());
+						if (!book.getBookAuthor().equals(author)) {
+							queryBook.remove(book.getBookId());
+						}
 					}
 				}
 			} else if (method.equals("4")) {
 				iterator = library.keySet().iterator();
 				System.out.print("请输入出版社名称:");
 				String press = input.nextLine();
-				while (iterator.hasNext()) {
-					String bookId = iterator.next();
-					if (library.get(bookId).getBookPress().indexOf(press) > -1) {
-						queryBook.put(bookId, library.get(bookId));
+				if (queryBook.isEmpty()) {
+					while (iterator.hasNext()) {
+						String bookId = iterator.next();
+						if (library.get(bookId).getBookPress().indexOf(press) > -1) {
+							queryBook.put(bookId, library.get(bookId));
+						}
 					}
-				}
-				iterator = queryBook.keySet().iterator();
-				while (iterator.hasNext()) {
-					String bookId = iterator.next();
-					if (!queryBook.get(bookId).getBookPress().equals(press)) {
-						removeBookId.add(bookId);
+				} else {
+					iterator = queryBook.keySet().iterator();
+					while (iterator.hasNext()) {
+						book = queryBook.get(iterator.next());
+						if (!book.getBookPress().equals(press)) {
+							queryBook.remove(book.getBookId());
+						}
 					}
 				}
 			} else {
 				System.out.println("输入有误！！");
 				queryBook();
 			}
-		}
-		iterator = removeBookId.iterator();
-		while (iterator.hasNext()) {
-			queryBook.remove(iterator.next());
 		}
 		System.out.println("查询结果:");
 		display(queryBook);
