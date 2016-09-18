@@ -24,6 +24,8 @@ import java.util.TreeMap;
 public class BooksManagementSys {
 
 	private Book book;
+	private Administrator admin;
+	private TreeMap<String, Administrator> AdminMap = new TreeMap<>();
 	private TreeMap<String, Book> library = new TreeMap<String, Book>();
 	private TreeMap<String, Book> deleteBook = new TreeMap<>();
 	private TreeMap<String, Reader> readers = new TreeMap<>();
@@ -57,7 +59,6 @@ public class BooksManagementSys {
 	}
 
 	public void mainMenu() {
-		System.out.println("#####欢迎使用GUET图书管理系统#####\n");
 		System.out.print(
 				"主菜单:\n1.新增图书\n2.借/还图书\n3.修改图书信息\n4.删除图书\n5.查找图书\n6.新增管理员\n7.读者管理\n8.信息统计\n9.保存修改\n10.退出系统\n请选择要执行的操作：");
 		int option = input.nextInt();
@@ -99,9 +100,25 @@ public class BooksManagementSys {
 		}
 	}
 
+	/**
+	 * 系统登录
+	 */
 	public void login() {
 		read();
-		mainMenu();
+		Scanner input = new Scanner(System.in);
+		System.out.print("账号:");
+		String AdminId = input.nextLine();
+		System.out.print("密码:");
+		String pass = input.nextLine();
+		if (AdminMap.get(AdminId).getAdminPass().equals(pass)) {
+			System.out.println("#####欢迎使用GUET图书管理系统#####\n");
+			System.out.println("所有图书信息:");
+			display(library);
+			mainMenu();
+		} else {
+			System.out.println("账号或密码有误！！");
+			login();
+		}
 	}
 
 	public void addBook() {
@@ -165,6 +182,7 @@ public class BooksManagementSys {
 	}
 
 	public void borrowOrReturnBook() {
+		Scanner input = new Scanner(System.in);
 		System.out.println("1.借书\n2.还书");
 		System.out.print("请选择要执行的操作：");
 		String option = input.nextLine();
@@ -183,6 +201,7 @@ public class BooksManagementSys {
 	 * 借书
 	 */
 	public void borrowBook() {
+		Scanner input = new Scanner(System.in);
 		System.out.print("请输入要借阅书籍编号:");
 		String bookId = input.nextLine();
 		book = library.get(bookId);
@@ -224,6 +243,7 @@ public class BooksManagementSys {
 	 * 还书
 	 */
 	public void returnBook() {
+		Scanner input = new Scanner(System.in);
 		System.out.print("请输入借阅编号:");
 		String borrowId = input.nextLine();
 		while ((borrowInfo = borrowInfoMap.get(borrowId)) == null) {
@@ -356,6 +376,11 @@ public class BooksManagementSys {
 		Scanner input = new Scanner(System.in);
 		System.out.print("1.按图书编号\n2.按书名\n3.按作者\n4.按出版社\n请选择要查找的方式(若要多条件联合查询，请用逗号将查找方式隔开，例如：1,2):");
 		String queryMethod = input.nextLine();
+		if (queryMethod.equals("")) {// 如果直接回车不输入查找方式，则显示所有图书信息
+			display(library);
+			mainMenu();
+			return;
+		}
 		String[] queryMethodArray = queryMethod.split(",");
 		for (String method : queryMethodArray) {
 			if (method.equals("1")) {
@@ -449,11 +474,33 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 添加管理员
+	 */
 	public void addAdmin() {
-		System.out.println("新增管理员");
+		Scanner input = new Scanner(System.in);
+		admin = new Administrator();
+		if (AdminMap.isEmpty()) {// 如果是第一次添加，则管理员id号从11111开始
+			admin.setAdminId("11111");
+		} else {
+			admin.setAdminId(newId(AdminMap.lastKey()));// 否则以自增的方式自动生成管理员id号
+		}
+		System.out.print("请输入管理员姓名:");
+		String adminName = input.nextLine();
+		admin.setAdminName(adminName);
+		System.out.print("请输入密码:");
+		String pass = input.nextLine();
+		admin.setAdminPass(pass);
+		System.out.print("请输入电话号码:");
+		String phone = input.nextLine();
+		admin.setAdminPhone(phone);
+		AdminMap.put(admin.getAdminId(), admin);// 将新增加的管理员放到管理员集合
+		System.out.println("添加成功！！");
+		mainMenu();
 	}
 
 	public void readerManagement() {
+		Scanner input = new Scanner(System.in);
 		System.out.println("1.新增读者\n2.查询读者");
 		System.out.print("请选择要执行的操作:");
 		String option = input.nextLine();
@@ -683,6 +730,28 @@ public class BooksManagementSys {
 			e.printStackTrace();
 		}
 
+		/**
+		 * 将管理员信息写入文件
+		 */
+		iterator = AdminMap.keySet().iterator();
+		while (iterator.hasNext()) {
+			admin = AdminMap.get(iterator.next());
+			stringBuilder.append(admin.getAdminId() + "," + admin.getAdminName() + "," + admin.getAdminPass() + ","
+					+ admin.getAdminPhone());
+		}
+		file = new File("H://BookManagementSys//adminInfo.txt");
+
+		try {
+			if (!file.exists()) {
+				file.createNewFile();
+			}
+			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+			bw.write(stringBuilder.toString());
+			stringBuilder.delete(0, stringBuilder.length());
+			bw.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		System.out.println("保存成功！！\n");
 		mainMenu();
 
@@ -721,8 +790,6 @@ public class BooksManagementSys {
 				book.setDeleteDate(tmpArray[9]);
 				library.put(book.getBookId(), book);
 			}
-			System.out.println("所有图书信息:");
-			display(library);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -802,6 +869,26 @@ public class BooksManagementSys {
 			// TODO: handle exception
 		}
 
+		/**
+		 * 读取管理员信息
+		 */
+		file = new File("H://BookManagementSys//adminInfo.txt");
+		try {
+			if (file.exists()) {
+				bufferedReader = new BufferedReader(new FileReader(file));
+				while ((tmpString = bufferedReader.readLine()) != null) {
+					tmpArray = tmpString.split(",");
+					admin = new Administrator();
+					admin.setAdminId(tmpArray[0]);
+					admin.setAdminName(tmpArray[1]);
+					admin.setAdminPass(tmpArray[2]);
+					admin.setAdminPhone(tmpArray[3]);
+					AdminMap.put(admin.getAdminId(), admin);
+				}
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void exit() {

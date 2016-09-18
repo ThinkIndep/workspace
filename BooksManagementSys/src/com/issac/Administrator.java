@@ -1,10 +1,10 @@
 package com.issac;
 
 public class Administrator {
-	private String adminId;
-	private String adminName;
-	private String adminPass;
-	private String adminPhone;
+	private String adminId;// 管理员编号
+	private String adminName;// 管理员姓名
+	private String adminPass;// 密码
+	private String adminPhone;// 电话
 
 	public String getAdminId() {
 		return adminId;
