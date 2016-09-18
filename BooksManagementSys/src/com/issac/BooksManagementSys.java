@@ -1,5 +1,9 @@
 package com.issac;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -21,6 +25,11 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeMap;
 
+/**
+ * 
+ * @author 苏伟锋 数据结构：数组、二叉树； 算法：排序
+ * 
+ */
 public class BooksManagementSys {
 
 	private Book book;
@@ -114,6 +123,7 @@ public class BooksManagementSys {
 		System.out.print("密码:");
 		String pass = input.nextLine();
 		if (AdminMap.get(AdminId).getAdminPass().equals(pass)) {
+			clear();
 			System.out.println("#####欢迎使用GUET图书管理系统#####\n");
 			System.out.println("所有图书信息:");
 			display(library);
@@ -180,6 +190,7 @@ public class BooksManagementSys {
 			book.setBuyDate(df.format(new Date()));
 			library.put(book.getBookId(), book);// 将录入的新书暂存在TreeMap的实例library中
 		}
+		clear();
 		System.out.println("书籍添加成功！！");
 		display(library);
 		mainMenu();
@@ -244,6 +255,7 @@ public class BooksManagementSys {
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 借书时间从系统获取
 		borrowInfo.setBorrowDate(df.format(new Date()));
 		borrowInfoMap.put(borrowInfo.getBorrowId(), borrowInfo);
+		clear();
 		System.out.println("借书成功！！");
 	}
 
@@ -263,6 +275,7 @@ public class BooksManagementSys {
 		book.setInLibrarySum(inLibrarySum);
 		DateFormat df = new SimpleDateFormat("yyyy-MM-dd hh:mm");// 还书时间从系统获取
 		borrowInfo.setReturnDate(df.format(new Date()));
+		clear();
 		System.out.println("还书成功！！");
 
 	}
@@ -271,6 +284,7 @@ public class BooksManagementSys {
 	 * 修改图书信息
 	 */
 	public void modifyBookInfo() {
+		Scanner input = new Scanner(System.in);
 		System.out.print("请输入要修改图书的编号：");
 		String bookId = input.nextLine();
 		while (bookId.equals("")) {
@@ -320,6 +334,7 @@ public class BooksManagementSys {
 		if (!inLibrarySum.equals("")) {
 			book.setInLibrarySum(inLibrarySum);
 		}
+		clear();
 		System.out.println("修改成功！！");
 		System.out.println("图书编号：" + book.getBookId() + "\n" + "图书名称：" + book.getBookName() + "\n" + "图书作者："
 				+ book.getBookAuthor() + "\n" + "出版社：" + book.getBookPress() + "\n" + "现存地址：" + book.getBookAddress()
@@ -331,6 +346,7 @@ public class BooksManagementSys {
 	 * 删除图书
 	 */
 	public void deleteBook() {
+		Scanner input = new Scanner(System.in);
 		System.out.print("请输入要删除图书的编号：");
 		String bookId = input.nextLine();
 		while (bookId.equals("")) {
@@ -370,6 +386,7 @@ public class BooksManagementSys {
 			deleteId = newId(deleteBook.lastKey());
 		}
 		deleteBook.put(deleteId, book);
+		clear();
 		System.out.println("删除成功！！");
 		mainMenu();
 	}
@@ -380,13 +397,12 @@ public class BooksManagementSys {
 	public void queryBook() {
 		List<String> removeBookId = new ArrayList<>();
 		TreeMap<String, Book> queryBook = new TreeMap<String, Book>();
-		// TreeMap<String, Book> removeBook = new TreeMap<>();//
-		// 多条件查询时用来筛除不符合条件的Book
 		Iterator<String> iterator;
 		Scanner input = new Scanner(System.in);
 		System.out.print("1.按图书编号\n2.按书名\n3.按作者\n4.按出版社\n请选择要查找的方式(若要多条件联合查询，请用逗号将查找方式隔开，例如：1,2):");
 		String queryMethod = input.nextLine();
 		if (queryMethod.equals("")) {// 如果直接回车不输入查找方式，则显示所有图书信息
+			clear();
 			display(library);
 			mainMenu();
 			return;
@@ -478,6 +494,7 @@ public class BooksManagementSys {
 				queryBook();
 			}
 		}
+		clear();
 		System.out.println("查询结果:");
 		display(queryBook);
 		queryBook.clear();// 清除查询结果集
@@ -505,6 +522,7 @@ public class BooksManagementSys {
 		String phone = input.nextLine();
 		admin.setAdminPhone(phone);
 		AdminMap.put(admin.getAdminId(), admin);// 将新增加的管理员放到管理员集合
+		clear();
 		System.out.println("添加成功！！");
 		mainMenu();
 	}
@@ -545,6 +563,7 @@ public class BooksManagementSys {
 		String readerGender = input.nextLine();
 		reader.setReaderGender(readerGender);
 		readers.put(reader.getReaderId(), reader);
+		clear();
 		System.out.println("添加成功！！");
 		mainMenu();
 	}
@@ -561,6 +580,7 @@ public class BooksManagementSys {
 		}
 		System.out.println("读者姓名:" + readers.get(readerId).getReaderName());
 		readers.remove(readerId);
+		clear();
 		System.out.println("删除成功！！");
 		mainMenu();
 	}
@@ -569,6 +589,7 @@ public class BooksManagementSys {
 	 * 查询读者信息
 	 */
 	public void queryReader() {
+		Scanner input = new Scanner(System.in);
 		System.out.print("请输入读者编号：");
 		String readerId = input.nextLine();
 		while (readers.get(readerId) == null) {
@@ -576,6 +597,7 @@ public class BooksManagementSys {
 			readerId = input.nextLine();
 		}
 		reader = readers.get(readerId);
+		clear();
 		System.out.println("读者信息:\n" + "编号：" + reader.getReaderId() + "\n" + "姓名:" + reader.getReaderName() + "\n"
 				+ "电话号码:" + reader.getReaderPhone() + "\n" + "性别:" + reader.getReaderGender());
 
@@ -598,6 +620,7 @@ public class BooksManagementSys {
 	 * 信息统计,包括图书借阅数量前十统计，各书库藏书情况统计
 	 */
 	public void infoStatistics() {
+		clear();
 		List<Map.Entry<String, Book>> list = new ArrayList<Map.Entry<String, Book>>(library.entrySet());
 		Collections.sort(list, new Comparator<Map.Entry<String, Book>>() {
 			public int compare(Entry<String, Book> o1, Entry<String, Book> o2) {
@@ -917,6 +940,7 @@ public class BooksManagementSys {
 	}
 
 	public void exit() {
+		clear();
 		System.out.println("已退出系统，欢迎再次使用");
 		System.exit(0);
 	}
@@ -966,8 +990,30 @@ public class BooksManagementSys {
 		return true;
 	}
 
+	/**
+	 * 控制台清屏
+	 * 
+	 * @throws AWTException
+	 */
+	public void clear() {
+		Robot r;
+		try {
+			r = new Robot();
+			r.mousePress(InputEvent.BUTTON3_MASK); // 按下鼠标右键
+			r.mouseRelease(InputEvent.BUTTON3_MASK); // 释放鼠标右键
+			r.keyPress(KeyEvent.VK_CONTROL); // 按下Ctrl键
+			r.keyPress(KeyEvent.VK_R); // 按下R键
+			r.keyRelease(KeyEvent.VK_R); // 释放R键
+			r.keyRelease(KeyEvent.VK_CONTROL); // 释放Ctrl键
+			r.delay(100);
+		} catch (AWTException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
 	public static void main(String[] args) {
 		new BooksManagementSys().login();
-
 	}
 }
