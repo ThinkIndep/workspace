@@ -1,11 +1,11 @@
 package com.issac;
 
 public class BorrowInfo {
-	private String borrowId;
-	private String readerId;
-	private String borrowBookId;
-	private String borrowDate;
-	private String returnDate="未还";
+	private String borrowId;// 借阅编号
+	private String readerId;// 读者编号
+	private String borrowBookId;// 书籍编号
+	private String borrowDate;// 借书时间
+	private String returnDate = "未还";// 还书时间
 
 	public String getBorrowId() {
 		return borrowId;

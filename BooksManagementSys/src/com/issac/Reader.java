@@ -1,10 +1,10 @@
 package com.issac;
 
 public class Reader {
-	private String readerId;
-	private String readerName;
-	private String readerPhone;
-	private String readerGender;
+	private String readerId;// 读者编号
+	private String readerName;// 读者姓名
+	private String readerPhone;// 读者电话
+	private String readerGender;// 读者性别
 
 	public String getReaderId() {
 		return readerId;

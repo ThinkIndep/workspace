@@ -25,12 +25,12 @@ public class BooksManagementSys {
 
 	private Book book;
 	private Administrator admin;
-	private TreeMap<String, Administrator> AdminMap = new TreeMap<>();
-	private TreeMap<String, Book> library = new TreeMap<String, Book>();
-	private TreeMap<String, Book> deleteBook = new TreeMap<>();
-	private TreeMap<String, Reader> readers = new TreeMap<>();
+	private TreeMap<String, Administrator> AdminMap = new TreeMap<>();// 管理员集合
+	private TreeMap<String, Book> library = new TreeMap<String, Book>();// 书籍集合
+	private TreeMap<String, Book> deleteBook = new TreeMap<>();// 删除书籍集合
+	private TreeMap<String, Reader> readers = new TreeMap<>();// 读者集合
 	private BorrowInfo borrowInfo;
-	private TreeMap<String, BorrowInfo> borrowInfoMap = new TreeMap<>();
+	private TreeMap<String, BorrowInfo> borrowInfoMap = new TreeMap<>();// 借阅信息集合
 	private Reader reader;
 	private Scanner input = new Scanner(System.in);
 
@@ -58,6 +58,9 @@ public class BooksManagementSys {
 		this.reader = reader;
 	}
 
+	/**
+	 * 主菜单
+	 */
 	public void mainMenu() {
 		System.out.print(
 				"主菜单:\n1.新增图书\n2.借/还图书\n3.修改图书信息\n4.删除图书\n5.查找图书\n6.新增管理员\n7.读者管理\n8.信息统计\n9.保存修改\n10.退出系统\n请选择要执行的操作：");
@@ -121,6 +124,9 @@ public class BooksManagementSys {
 		}
 	}
 
+	/**
+	 * 添加书籍
+	 */
 	public void addBook() {
 
 		System.out.print("请输入图书编号：");
@@ -135,15 +141,15 @@ public class BooksManagementSys {
 			bookid = input.nextLine();
 		}
 		if (library.get(bookid) != null) {
-			System.out.print("此书图书馆已购买有，请输入新进册数：");
+			System.out.print("此书图书馆已购买有，请输入新进册数：");// 如果图书原已经有藏书，则增加书籍数量即可
 			String count = input.nextLine();
 			while (!isNumeric(count)) {
 				System.out.print("输入有误！！请不要输入数字以外的字符！！\n请重新输入新进册数：");
 				count = input.nextLine();
 			}
 			book = library.get(bookid);
-			int bookSum = Integer.valueOf(book.getBookSum()) + Integer.valueOf(count);
-			int inLibrarySum = Integer.valueOf(book.getInLibrarySum()) + Integer.valueOf(count);
+			int bookSum = Integer.valueOf(book.getBookSum()) + Integer.valueOf(count);// 图书总数增加
+			int inLibrarySum = Integer.valueOf(book.getInLibrarySum()) + Integer.valueOf(count);// 在馆数也增加
 			book.setBookSum(String.valueOf(bookSum));
 			book.setInLibrarySum(String.valueOf(inLibrarySum));
 		} else {
@@ -176,11 +182,13 @@ public class BooksManagementSys {
 		}
 		System.out.println("书籍添加成功！！");
 		display(library);
-		// input.close();
 		mainMenu();
 
 	}
 
+	/**
+	 * 借还书
+	 */
 	public void borrowOrReturnBook() {
 		Scanner input = new Scanner(System.in);
 		System.out.println("1.借书\n2.还书");
@@ -210,7 +218,7 @@ public class BooksManagementSys {
 			bookId = input.nextLine();
 			book = library.get(bookId);
 		}
-		if (book.getInLibrarySum().equals("0")) {// 如果此书在图书馆中已经被借完
+		if (book.getInLibrarySum().equals("0")) {// 如果此书在图书馆中已经被借完,则不能借书
 			System.out.println("此书已借完!!");
 			return;
 		}
@@ -229,7 +237,7 @@ public class BooksManagementSys {
 		if (borrowInfoMap.keySet().isEmpty()) {// 如果是本系统第一次借阅，则借阅编号从11111开始
 			borrowInfo.setBorrowId("11111");
 		} else {
-			borrowInfo.setBorrowId(newId(borrowInfoMap.lastKey()));
+			borrowInfo.setBorrowId(newId(borrowInfoMap.lastKey()));// 否则借书编号以递增的方式生成
 		}
 		borrowInfo.setReaderId(reader.getReaderId());
 		borrowInfo.setBorrowBookId(book.getBookId());
@@ -316,10 +324,12 @@ public class BooksManagementSys {
 		System.out.println("图书编号：" + book.getBookId() + "\n" + "图书名称：" + book.getBookName() + "\n" + "图书作者："
 				+ book.getBookAuthor() + "\n" + "出版社：" + book.getBookPress() + "\n" + "现存地址：" + book.getBookAddress()
 				+ "\n" + "图书总数：" + book.getBookSum() + "\n" + "在馆数：" + book.getInLibrarySum());
-		// library.put(book.getBookId(), book);
 		mainMenu();
 	}
 
+	/**
+	 * 删除图书
+	 */
 	public void deleteBook() {
 		System.out.print("请输入要删除图书的编号：");
 		String bookId = input.nextLine();
@@ -350,11 +360,11 @@ public class BooksManagementSys {
 		System.out.print("2.在馆数：");
 		String inLibrarySum = input.nextLine();
 		book.setInLibrarySum(inLibrarySum);
-		if (book.getBookSum().equals("0")) {
+		if (book.getBookSum().equals("0")) {// 如果删除后图书总数为0，则将此书从Library集合中去除
 			library.remove(bookId);
 		}
 		String deleteId = "";
-		if (deleteBook.keySet().isEmpty()) {
+		if (deleteBook.keySet().isEmpty()) {// 如果是第一次删除，则删除编号为11111，否则以自增的方式产生
 			deleteId = "11111";
 		} else {
 			deleteId = newId(deleteBook.lastKey());
@@ -387,9 +397,9 @@ public class BooksManagementSys {
 				iterator = library.keySet().iterator();
 				System.out.print("请输入书籍编号:");
 				String bookId = input.nextLine();
-				if (queryBook.isEmpty()) {
+				if (queryBook.isEmpty()) {// 多条件联合查询时，则从前面查询结果中筛选出符合此条件的结果
 					while (iterator.hasNext()) {
-						if (iterator.next().indexOf(bookId) > -1) {
+						if (iterator.next().indexOf(bookId) > -1) {// 实现模糊查询
 							queryBook.put(bookId, library.get(bookId));
 						}
 					}
@@ -470,7 +480,7 @@ public class BooksManagementSys {
 		}
 		System.out.println("查询结果:");
 		display(queryBook);
-		queryBook.clear();
+		queryBook.clear();// 清除查询结果集
 		mainMenu();
 	}
 
@@ -499,6 +509,9 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 读者管理
+	 */
 	public void readerManagement() {
 		Scanner input = new Scanner(System.in);
 		System.out.println("1.新增读者\n2.查询读者");
@@ -514,6 +527,9 @@ public class BooksManagementSys {
 		}
 	}
 
+	/**
+	 * 添加读者
+	 */
 	public void addReader() {
 		reader = new Reader();
 		System.out.print("请输入读者编号：");
@@ -533,6 +549,9 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 删除读者
+	 */
 	public void deleteReader() {
 		System.out.print("请输入读者编号：");
 		String readerId = input.nextLine();
@@ -546,6 +565,9 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 查询读者信息
+	 */
 	public void queryReader() {
 		System.out.print("请输入读者编号：");
 		String readerId = input.nextLine();
@@ -557,7 +579,7 @@ public class BooksManagementSys {
 		System.out.println("读者信息:\n" + "编号：" + reader.getReaderId() + "\n" + "姓名:" + reader.getReaderName() + "\n"
 				+ "电话号码:" + reader.getReaderPhone() + "\n" + "性别:" + reader.getReaderGender());
 
-		// 将读者的借阅图书的所有信息列出
+		// 将此读者的借阅图书的所有信息列出
 		Iterator<String> borrowIds = borrowInfoMap.keySet().iterator();
 		System.out.println("#####读者借书记录#####");
 		System.out.println("借阅编号" + "\t" + "书籍编号" + "\t" + "书籍名称" + "\t" + "借书时间" + "\t" + "还书时间");
@@ -572,6 +594,9 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	/**
+	 * 信息统计,包括图书借阅数量前十统计，各书库藏书情况统计
+	 */
 	public void infoStatistics() {
 		List<Map.Entry<String, Book>> list = new ArrayList<Map.Entry<String, Book>>(library.entrySet());
 		Collections.sort(list, new Comparator<Map.Entry<String, Book>>() {
