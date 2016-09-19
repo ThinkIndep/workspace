@@ -668,6 +668,57 @@ public class BooksManagementSys {
 		mainMenu();
 	}
 
+	public void orderByBorrowSum() {
+		// 1.输入要查询的月份
+		// 2.提取月份
+		// 3.比较读者编号
+		// 4.借阅次数累加
+		// 5.放到集合并且排序
+		TreeMap<String, Integer> orderReader = new TreeMap<>();
+		System.out.print("请输入要查询的月份:");
+		Scanner input = new Scanner(System.in);
+		String month = input.nextLine();
+		Iterator<String> readerIdit = readers.keySet().iterator();
+		Iterator<String> iterator;
+		while (readerIdit.hasNext()) {
+			iterator = borrowInfoMap.keySet().iterator();
+			String readerId = readerIdit.next();
+			int count = 0;
+			while (iterator.hasNext()) {
+				borrowInfo = borrowInfoMap.get(iterator.next());
+				if (getMonth(borrowInfo.getBorrowDate()).equals(month) && borrowInfo.getReaderId().equals(readerId)) {
+					count++;
+				}
+//				System.out.println(getMonth(borrowInfo.getBorrowDate()));
+			}
+			orderReader.put(readerId, count);
+		}
+		List<Map.Entry<String, Integer>> list = new ArrayList<Map.Entry<String, Integer>>(orderReader.entrySet());
+		Collections.sort(list, new Comparator<Map.Entry<String, Integer>>() {
+			public int compare(Entry<String, Integer> o1, Entry<String, Integer> o2) {
+				if (o1.getValue() < o2.getValue()) {
+					return 1;
+				} else {
+					return -1;
+				}
+			}
+		});
+		System.out.println("读者ID\t读者姓名\t借阅次数");
+		for (Map.Entry<String, Integer> mapping : list) {
+			String readerID = mapping.getKey();
+			reader = readers.get(readerID);
+			System.out.println(reader.getReaderId() + "\t" + reader.getReaderName() + "\t" + mapping.getValue());
+
+		}
+
+	}
+
+	public String getMonth(String date) {
+		date = date.replaceAll(" ", "-").replaceAll(":", "-");
+		String strs[] = date.split("-");
+		return strs[1];
+	}
+
 	/**
 	 * 将修改后的数据写入文件里
 	 */
@@ -694,10 +745,8 @@ public class BooksManagementSys {
 				file.createNewFile();
 			}
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			// System.out.println(stringBuilder.toString());
 			bw.write(stringBuilder.toString());
 			stringBuilder.delete(0, stringBuilder.length());
-			// System.out.println(stringBuilder.toString());
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -744,10 +793,8 @@ public class BooksManagementSys {
 				file.createNewFile();
 			}
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			// System.out.println(stringBuilder.toString());
 			bw.write(stringBuilder.toString());
 			stringBuilder.delete(0, stringBuilder.length());
-			// System.out.println(stringBuilder.toString());
 			bw.close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
